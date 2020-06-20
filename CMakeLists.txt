@@ -98,6 +98,8 @@ set(ReadsToTranscripts_SOURCES analysis/AACodons.cc
                                analysis/DNAVector.cc
                                analysis/NonRedKmerTable.cc
                                analysis/ReadsToTranscripts.cc
+                               analysis/sequenceUtil.cc
+                               analysis/stacktrace.cc
                                base/ErrorHandling.cc
                                base/FileParser.cc
                                base/StringUtil.cc

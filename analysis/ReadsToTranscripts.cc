@@ -11,6 +11,7 @@
 #include "base/CommandLineParser.h"
 #include "analysis/DNAVector.h"
 #include "analysis/NonRedKmerTable.h"
+#include "analysis/sequenceUtil.h"
 
 //#include "analysis/CompMgr.h"
 #include <queue>
@@ -72,6 +73,7 @@ int main(int argc,char** argv)
     commandArg<int> pctReadMapCmmd("-p", "percent of read kmers require mapping to component", 0);
     commandArg<bool> verboseCmmd("-verbose", "prints more status info", false);
     commandArg<int> numThreadsCmmd("-t", "number of threads (default: env OMP_NUM_THREADS)", 0);
+    commandArg<double> minKmerEntropyCmmd("-min_kmer_entropy", "min kmer entropy for assigning reads to iworm contigs", 1.5);
 
     commandLineParser P(argc,argv);
     P.SetDescription("Assigns reads to graph components.");
@@ -83,7 +85,8 @@ int main(int argc,char** argv)
     P.registerArg(pctReadMapCmmd);
     P.registerArg(verboseCmmd);
     P.registerArg(numThreadsCmmd);
-
+    P.registerArg(minKmerEntropyCmmd);
+    
     P.parse();
 
     cerr << "-------------------------------------------" << endl
@@ -101,7 +104,9 @@ int main(int argc,char** argv)
     int num_threads = P.GetIntValueFor(numThreadsCmmd);
     
     bool VERBOSE = P.GetBoolValueFor(verboseCmmd);
+    float min_kmer_entropy = P.GetDoubleValueFor(minKmerEntropyCmmd);
     
+
     vecDNAVector dna;
 
     if(max_mem_reads > 0){
@@ -220,6 +225,12 @@ int main(int argc,char** argv)
             comp.reserve(4000);
             int num_kmer_pos = d.size()-k + 1;
             for (int j=0; j<=(int)d.size()-k; j++) {
+                string s = kt.GetKmerString(d,j);
+                float entropy = compute_entropy(s);
+                //cout << "[" << i << "," << j << "] " << s << " entropy: " << entropy << endl;
+                
+                if (entropy < min_kmer_entropy) { continue; }
+
                 int c = kt.GetCountReal(d, j); // the iworm bundle containing read kmer
                 if (c >= 0)
                     comp.push_back(c);
@@ -228,6 +239,11 @@ int main(int argc,char** argv)
                 string dd = d;
                 DNAVector::ReverseComplement(dd);
                 for (int j=0; j<=(int)dd.size()-k; j++) {
+
+                    string s = kt.GetKmerString(dd,j); 
+                    float entropy = compute_entropy(s);
+                    if (entropy < min_kmer_entropy) { continue; } 
+                    
                     int c = kt.GetCountReal(dd, j);
                     if (c >= 0)
                         comp.push_back(c);

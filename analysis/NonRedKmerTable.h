@@ -59,6 +59,12 @@ class NonRedKmerTable
     return m_counts[i];
   }
 
+
+  string GetKmerString(const string & seq, size_t pos) { 
+      string s = seq.substr(pos, m_k);  
+      return(s);
+  }
+  
   void SetAllCounts(int c) {
     for (size_t i=0; i<m_counts.size(); i++)
       m_counts[i] = c;
