@@ -8,6 +8,9 @@
 #include "analysis/DNAVector.h"
 #include "analysis/KmerTable.h"
 #include "base/CommandLineParser.h"
+#include "analysis/sequenceUtil.h"
+
+
 
 extern "C"
 {
@@ -20,6 +23,9 @@ extern "C"
 static bool DEBUG_FLAG = false;
 
 using namespace std;
+
+
+static float MIN_KMER_ENTROPY = 1.0;
 
 bool Exists(const string & s)
 {
@@ -67,7 +73,7 @@ void SortPrint(FILE * pReads, svec<IDS> & ids, const vecDNAVector & seq)
 #endif
 			) {
 			if (lastID != -1) {
-
+                // tail end of previous record
 				sprintf(tmp, "%d\t%d\t", lastStart, lastEdge);
 				line += tmp;
 				if (lastStart > lastStartTemp) {
@@ -100,6 +106,7 @@ void SortPrint(FILE * pReads, svec<IDS> & ids, const vecDNAVector & seq)
 				//fprintf(pReads, "%d\t%d\n", lastStart, lastEdge);
 				line = "";
 			}
+            // building initial part of record line:
 			//fprintf(pReads, "%s\t%d\t%d\t", seq.Name(id).c_str(), start, edge);
 			sprintf(tmp, "%s\t%d\t%d\t", seq.Name(id).c_str(), start, edge);
 			line = tmp;
@@ -228,12 +235,27 @@ void add_kmers(const vecDNAVector & all, int K, vector<KmerEntry>& result)
 }
 
 long long BasesToNumberCountPlus(const vector<KmerEntry>& kmers,
-	svec<IDS> & ids,
-	long long & count,
-	const DNAVector & d,
-	int edge,
-	const vecDNAVector& reads,
-	int kmer_length) {
+                             	svec<IDS> & ids,
+ 	                            long long & count,
+	                            const DNAVector & d,
+	                            int edge,
+	                            const vecDNAVector& reads,
+	                            int kmer_length) {
+
+
+
+    // Stores all kmer match positions among the reads in the svec <IDS> ids  vector.
+    
+    
+    char kmerseq [kmer_length + 1];
+    strncpy(kmerseq, &d[1], kmer_length);
+    kmerseq[kmer_length] = '\0';
+    //cout << "kmer: [" << kmerseq << "]" << endl;
+    string s_kmerseq(kmerseq);
+    float entropy = compute_entropy(s_kmerseq);
+    if (entropy < MIN_KMER_ENTROPY) return(0);  // only storing those kmers that aren't entirely low complexity. (ie. avoiding polyA)
+    
+    
 
 	KmerEntryCompare comparer(reads, kmer_length);
 	comparer.set_target(d);
@@ -252,12 +274,14 @@ long long BasesToNumberCountPlus(const vector<KmerEntry>& kmers,
 			break;
 		if (comparer(kmers[ret], kmers[i]))
 			break;
+    
+        //cerr << "\tkmer_idx: " << kmers[i].Index() << "\tpos: " << kmers[i].Pos() << " edge: " << edge << "\t" << reads.Name(kmers[i].Index()) << endl;
 		ids.push_back(IDS(kmers[i].Index(), kmers[i].Pos(), edge));
 		count++;
 	}
 
 
-	// cerr << "Searched: " << d.AsString() << "\tcount: " << count << endl;
+	//cerr << "Searched: " << d.AsString() << "\tcount: " << count << endl;
 
 	return ret;
 }
@@ -377,7 +401,12 @@ int main(int argc, char** argv)
 		}
 
 		const string & s = parser.AsString(3); // kmer
-		int node = parser.AsInt(0);
+		
+        //float entropy = compute_entropy(s);
+        //cout << "[" << i << "," << j << "] " << s << " entropy: " << entropy << endl;
+        //if (entropy < MIN_KMER_ENTROPY) continue;
+
+        int node = parser.AsInt(0);
 		int prevNode = parser.AsInt(1);
 
 		const char * p2 = s.c_str();
@@ -441,7 +470,7 @@ int main(int argc, char** argv)
 			}
 		}
 		fprintf(pOut, "\n");
-	}
+	} // end looping through the kmer graph nodes
 	if (ids.lsize() > 0) {
 		SortPrint(pReads, ids, seq);
 	}

@@ -84,6 +84,8 @@ set(QuantifyGraph_SOURCES aligns/KmerAlignCore.cc
                           base/ErrorHandling.cc
                           base/FileParser.cc
                           base/StringUtil.cc
+                          analysis/sequenceUtil.cc
+                          analysis/stacktrace.cc
                           util/mutil.cc )
 
 add_executable(QuantifyGraph ${QuantifyGraph_SOURCES})

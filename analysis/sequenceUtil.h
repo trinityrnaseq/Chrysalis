@@ -38,7 +38,7 @@ vector<kmer_int_type_t> sequence_string_to_kmer_int_type_vector(const string& se
 
 
 
-float compute_entropy(string& kmer);
+float compute_entropy(const string& kmer);
 float compute_entropy(kmer_int_type_t kmer, unsigned int kmer_length);
 
 #endif

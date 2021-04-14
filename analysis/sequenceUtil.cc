@@ -323,7 +323,7 @@ float compute_entropy(kmer_int_type_t kmer, unsigned int kmer_length) {
 }
   
 
-float compute_entropy(string& kmer) {
+float compute_entropy(const string& kmer) {
 
   map<char,int> char_map;
 
