@@ -376,7 +376,7 @@ int main(int argc,char** argv)
                 DNAStringStreamFast::formatReadNameString(readNameVector[read_index], tmpName);
                 buf += tmpName;
                 char foo[8];
-                sprintf(foo, "%d%%\t", read_pct_mapping_info[read_index]);
+                sprintf(foo, "%d\t", (int) (read_pct_mapping_info[read_index]/10 + 0.5) * 10);
                 buf += "\t";
                 buf += foo;
                 buf += readSeqVector[read_index];
