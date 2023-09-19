@@ -1,10 +1,10 @@
 all:
 	mkdir -p build
-	cd build && cmake -DCMAKE_INSTALL_PREFIX="" ../ && make DESTDIR=../ install
+	cd build && cmake -DCMAKE_INSTALL_PREFIX="" ../ && ${MAKE} DESTDIR=../ install
 
 debug:
 	mkdir -p build
-	cd build && cmake -DCMAKE_INSTALL_PREFIX="" -DCMAKE_BUILD_TYPE=Debug ../ && make DESTDIR=../ install
+	cd build && cmake -DCMAKE_INSTALL_PREFIX="" -DCMAKE_BUILD_TYPE=Debug ../ && ${MAKE} DESTDIR=../ install
 
 
 clean:
