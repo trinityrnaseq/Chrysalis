@@ -247,8 +247,11 @@ long long BasesToNumberCountPlus(const vector<KmerEntry>& kmers,
     // Stores all kmer match positions among the reads in the svec <IDS> ids  vector.
     
     
+    // the k-mer is d[0 .. kmer_length-1]; d has exactly kmer_length elements.
+    // (This used to copy from &d[1], reading one byte past the end of d, so the
+    //  entropy filter depended on leftover heap contents.)
     char kmerseq [kmer_length + 1];
-    strncpy(kmerseq, &d[1], kmer_length);
+    strncpy(kmerseq, &d[0], kmer_length);
     kmerseq[kmer_length] = '\0';
     //cout << "kmer: [" << kmerseq << "]" << endl;
     string s_kmerseq(kmerseq);
